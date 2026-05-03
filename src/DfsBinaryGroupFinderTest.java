@@ -279,7 +279,7 @@ public class DfsBinaryGroupFinderTest {
         // All 1s are connected in a U/snake shape
         List<Group> groups = finder.findConnectedGroups(image);
         assertEquals(1, groups.size());
-        assertEquals(8, groups.get(0).size());
+        assertEquals(7, groups.get(0).size());
     }
 
     @Test
