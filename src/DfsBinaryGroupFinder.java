@@ -1,5 +1,7 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -38,7 +40,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         for (int[] row : image) {
             if (row == null) throw new NullPointerException();
             if (row.length != image[0].length) throw new IllegalArgumentException();
-        } 
+        }
 
         List<Group> result = new ArrayList<>();
         boolean[][] visited = new boolean[image.length][image[0].length];
@@ -46,14 +48,10 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         for (int r = 0; r < image.length; r++) {
             for (int c = 0; c < image[0].length; c++) {
                 if (image[r][c] != 1 && image[r][c] != 0) throw new IllegalArgumentException();
-                
+
                 if (image[r][c] == 1 && !visited[r][c]) {
-                    Group current = dfs(image, r, c, visited);
-
-                    int avgRow = current.centroid().x() / current.size();
-                    int avgCol = current.centroid().y() / current.size();
-
-                    result.add(new Group(current.size(), new Coordinate(avgCol, avgRow)));
+                    Group current = collect(image, r, c, visited);
+                    result.add(current);
                 }
             }
         }
@@ -61,23 +59,42 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         return result;
     }
 
-    private static Group dfs(int[][] image, int row, int col, boolean[][] visited) {
-        if (row < 0 || row >= image.length || col < 0 || col >= image[0].length || image[row][col] == 0 || visited[row][col]) {
-            return new Group(0, new Coordinate(0,0));
+    private static Group collect(int[][] image, int startRow, int startCol, boolean[][] visited) {
+        Deque<int[]> stack = new ArrayDeque<>();
+        stack.push(new int[]{startRow, startCol});
+        visited[startRow][startCol] = true;
+
+        int size = 0;
+        int sumX = 0; // sum of column indices
+        int sumY = 0; // sum of row indices
+
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+        while (!stack.isEmpty()) {
+            int[] cell = stack.pop();
+            int row = cell[0];
+            int col = cell[1];
+
+            size++;
+            sumX += col; // x = column
+            sumY += row; // y = row
+
+            for (int[] dir : directions) {
+                int newRow = row + dir[0];
+                int newCol = col + dir[1];
+
+                if (newRow >= 0 && newRow < image.length
+                        && newCol >= 0 && newCol < image[0].length
+                        && image[newRow][newCol] == 1
+                        && !visited[newRow][newCol]) {
+                    visited[newRow][newCol] = true;
+                    stack.push(new int[]{newRow, newCol});
+                }
+            }
         }
 
-        visited[row][col] = true;
-
-        Group groupLeft = dfs(image, row -1, col, visited);
-        Group groupRight = dfs(image, row+1, col, visited);
-        Group groupDown = dfs(image, row, col-1, visited);
-        Group groupUp = dfs(image, row, col+1, visited);
-
-        int centroidRow = (row + groupLeft.centroid().x() + groupRight.centroid().x() + groupDown.centroid().x() + groupUp.centroid().x());
-        int centroidCol = (col + groupLeft.centroid().y() + groupRight.centroid().y() + groupDown.centroid().y() + groupUp.centroid().y());
-        int groupSize = (1 + groupLeft.size() + groupRight.size() + groupDown.size() + groupUp.size());
-
-        return new Group(groupSize, new Coordinate(centroidRow, centroidCol));
+        int avgX = sumX / size;
+        int avgY = sumY / size;
+        return new Group(size, new Coordinate(avgX, avgY));
     }
-    
 }
