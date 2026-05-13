@@ -1,4 +1,4 @@
-package main.java;
+package com.ahmedihsan.centroidfinder;
 /**
  * Represents a location in an image or array
  * 

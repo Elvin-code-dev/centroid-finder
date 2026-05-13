@@ -1,4 +1,4 @@
-package main.java;
+package com.ahmedihsan.centroidfinder;
 import java.util.List;
 
 public interface BinaryGroupFinder {

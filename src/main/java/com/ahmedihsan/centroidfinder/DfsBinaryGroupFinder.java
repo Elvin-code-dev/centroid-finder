@@ -1,4 +1,4 @@
-package main.java;
+package com.ahmedihsan.centroidfinder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;

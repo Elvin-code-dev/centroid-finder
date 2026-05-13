@@ -1,4 +1,4 @@
-package main.test.java;
+package com.ahmedihsan.centroidfinder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

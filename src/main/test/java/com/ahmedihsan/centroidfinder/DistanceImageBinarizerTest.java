@@ -1,4 +1,4 @@
-package main.test.java;
+package com.ahmedihsan.centroidfinder;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 

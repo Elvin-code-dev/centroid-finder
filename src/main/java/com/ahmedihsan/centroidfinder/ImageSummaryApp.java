@@ -1,4 +1,4 @@
-package main.java;
+package com.ahmedihsan.centroidfinder;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.PrintWriter;

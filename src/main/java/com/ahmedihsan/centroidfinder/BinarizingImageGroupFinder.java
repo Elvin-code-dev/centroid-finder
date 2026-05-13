@@ -1,4 +1,4 @@
-package main.java;
+package com.ahmedihsan.centroidfinder;
 import java.awt.image.BufferedImage;
 import java.util.Comparator;
 import java.util.List;
