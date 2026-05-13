@@ -1,3 +1,4 @@
+package main.java;
 import java.awt.image.BufferedImage;
 import java.util.Comparator;
 import java.util.List;

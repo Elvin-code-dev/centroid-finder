@@ -1,3 +1,4 @@
+package main.java;
 /**
  * Defines an interface for computing the distance between two colors.
  * 

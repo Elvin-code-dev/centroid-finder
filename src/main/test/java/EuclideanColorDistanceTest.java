@@ -1,5 +1,8 @@
+package main.test.java;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+
+import main.java.EuclideanColorDistance;
 
 public class EuclideanColorDistanceTest {
 
