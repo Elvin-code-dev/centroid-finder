@@ -2,12 +2,6 @@ package com.ahmedihsan.centroidfinder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.DfsBinaryGroupFinder;
-import main.java.DistanceImageBinarizer;
-import main.java.EuclideanColorDistance;
-import main.java.Group;
-import main.java.BinarizingImageGroupFinder;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.image.BufferedImage;

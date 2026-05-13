@@ -2,9 +2,6 @@ package com.ahmedihsan.centroidfinder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.DfsBinaryGroupFinder;
-import main.java.Group;
-
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 
