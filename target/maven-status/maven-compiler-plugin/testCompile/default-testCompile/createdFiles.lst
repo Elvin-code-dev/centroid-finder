@@ -1,0 +1,4 @@
+com\ahmedihsan\centroidfinder\DfsBinaryGroupFinderTest.class
+com\ahmedihsan\centroidfinder\DistanceImageBinarizerTest.class
+com\ahmedihsan\centroidfinder\BinarizingImageGroupFinderTest.class
+com\ahmedihsan\centroidfinder\EuclideanColorDistanceTest.class

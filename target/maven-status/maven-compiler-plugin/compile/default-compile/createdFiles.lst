@@ -1,1 +1,11 @@
+com\ahmedihsan\centroidfinder\ImageBinarizer.class
 com\ahmedihsan\centroidfinder\Coordinate.class
+com\ahmedihsan\centroidfinder\ImageSummaryApp.class
+com\ahmedihsan\centroidfinder\Group.class
+com\ahmedihsan\centroidfinder\DfsBinaryGroupFinder.class
+com\ahmedihsan\centroidfinder\BinaryGroupFinder.class
+com\ahmedihsan\centroidfinder\DistanceImageBinarizer.class
+com\ahmedihsan\centroidfinder\ColorDistanceFinder.class
+com\ahmedihsan\centroidfinder\EuclideanColorDistance.class
+com\ahmedihsan\centroidfinder\BinarizingImageGroupFinder.class
+com\ahmedihsan\centroidfinder\ImageGroupFinder.class
