@@ -22,6 +22,16 @@
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jcodec</groupId>
+            <artifactId>jcodec</artifactId>
+            <version>0.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcodec</groupId>
+            <artifactId>jcodec-javase</artifactId>
+            <version>0.2.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -36,7 +46,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.ahmedihsan.centroidfinder.ImageSummaryApp</mainClass>
+                    <mainClass>com.ahmedihsan.centroidfinder.VideoExperiment</mainClass>
                 </configuration>
             </plugin>
         </plugins>
