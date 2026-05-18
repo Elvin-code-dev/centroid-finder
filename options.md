@@ -45,3 +45,10 @@ VLCJ is a Java binding for the VLC media player's native library (libvlc). It le
 - Requires VLC to be installed on the machine running the program — it does not bundle its own native libraries, making it harder to distribute
 - Primarily designed for playback and media control, not for frame-by-frame image extraction; extracting frames as BufferedImages requires extra workarounds
 - Much more complex to set up than the other options for our specific use case
+
+
+## Final Choice: JCodec
+
+We chose JCodec because it is pure Java with no native libraries needed,
+easy to add as a Maven dependency, and it successfully read metadata and
+extracted frames from our sample MP4 with minimal setup.
