@@ -91,4 +91,22 @@ VideoProcessorApp
 
 ## Wave 4: Validation
 
-*(To be filled in after testing with a real salamander video.)*
+### Color and threshold selection
+
+We opened a frame from the salamander video in an image editor and used the eyedropper on the body to pick the target color. We tried a few threshold values and checked whether the largest group in `groups.csv` matched the body. The largest group came out at **6987 pixels** at **(533, 510)**, which was clearly the salamander since the next largest group was only 5564 pixels. We kept that color and threshold.
+
+### Running the processor
+
+```
+java -jar target/videoprocessor.jar salamander.mp4 output.csv <color> <threshold>
+```
+
+This produced `output.csv` with one row per frame across the full ~97 second video.
+
+### Validating the output
+
+We checked two things in `output.csv`:
+
+1. **Smooth movement** — for most of the video the centroid moves gradually (x goes from ~223 down to ~42, y from ~420 to ~590 over the first 40 seconds), which matches a real animal walking across the frame.
+
+2. **False detections** — around t = 61 s and t = 73-89 s the centroid jumps to coordinates near **(301, 8)**, near the very top of the frame. This could be fast movement or adjustments from the camera. This was a sign the threshold was slightly too loose for this video. It was very interesting trying different thresholds but we also readlized it takes a long time to process a video.
