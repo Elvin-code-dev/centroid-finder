@@ -6,6 +6,7 @@ com\ahmedihsan\centroidfinder\DfsBinaryGroupFinder.class
 com\ahmedihsan\centroidfinder\BinaryGroupFinder.class
 com\ahmedihsan\centroidfinder\DistanceImageBinarizer.class
 com\ahmedihsan\centroidfinder\ColorDistanceFinder.class
+com\ahmedihsan\centroidfinder\VideoExperiment.class
 com\ahmedihsan\centroidfinder\EuclideanColorDistance.class
 com\ahmedihsan\centroidfinder\BinarizingImageGroupFinder.class
 com\ahmedihsan\centroidfinder\ImageGroupFinder.class
