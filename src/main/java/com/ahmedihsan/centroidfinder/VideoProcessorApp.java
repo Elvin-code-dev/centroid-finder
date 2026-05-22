@@ -35,22 +35,12 @@ public class VideoProcessorApp {
         ImageGroupFinder groupFinder = new BinarizingImageGroupFinder(binarizer, new DfsBinaryGroupFinder());
 
         VideoFrameExtractor extractor = new JCodecVideoFrameExtractor();
-        List<TimestampedFrame> frames;
-        try {
-            frames = extractor.extract(new File(inputPath));
-        } catch (Exception e) {
-            System.err.println("Error reading video: " + inputPath);
-            e.printStackTrace();
-            return;
-        }
 
         try (PrintWriter writer = new PrintWriter(outputCsv)) {
-            for (TimestampedFrame frame : frames) {
-                writer.println(buildCsvLine(frame, groupFinder));
-            }
+            extractor.extract(new File(inputPath), frame -> writer.println(buildCsvLine(frame, groupFinder)));
             System.out.println("Output written to " + outputCsv);
         } catch (Exception e) {
-            System.err.println("Error writing output CSV.");
+            System.err.println("Error processing video: " + inputPath);
             e.printStackTrace();
         }
     }

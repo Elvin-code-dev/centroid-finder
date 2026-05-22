@@ -12,13 +12,12 @@ import org.jcodec.scale.AWTUtil;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class JCodecVideoFrameExtractor implements VideoFrameExtractor {
 
     @Override
-    public List<TimestampedFrame> extract(File video) throws IOException, JCodecException {
+    public void extract(File video, Consumer<TimestampedFrame> consumer) throws IOException, JCodecException {
         MP4Demuxer demuxer = MP4Demuxer.createMP4Demuxer(NIOUtils.readableChannel(video));
         DemuxerTrack videoTrack = demuxer.getVideoTrack();
         DemuxerTrackMeta meta = videoTrack.getMeta();
@@ -29,16 +28,13 @@ public class JCodecVideoFrameExtractor implements VideoFrameExtractor {
 
         FrameGrab grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(video));
 
-        List<TimestampedFrame> frames = new ArrayList<>();
         int index = 0;
         Picture picture;
         while ((picture = grab.getNativeFrame()) != null) {
             double seconds = index / fps;
             BufferedImage image = AWTUtil.toBufferedImage(picture);
-            frames.add(new TimestampedFrame(seconds, image));
+            consumer.accept(new TimestampedFrame(seconds, image));
             index++;
         }
-
-        return frames;
     }
 }
