@@ -91,6 +91,7 @@ VideoProcessorApp
 
 ## Wave 4: Validation
 
+<<<<<<< HEAD
 ### Choosing a color and threshold
 
 The salamander in our test video had a dark brownish-orange body against a lighter substrate/tank background. To pick the target color we:
@@ -98,10 +99,16 @@ The salamander in our test video had a dark brownish-orange body against a light
 1. Opened a mid-video frame in an image editor and used the eyedropper tool on the salamander's body (not its belly, which was lighter). We sampled several pixels and averaged them, landing on roughly `#5C3A1E` (a warm dark brown).
 2. We started with a threshold of **50** (Euclidean RGB distance). That was too tight — pixels on the edges of the body and the slightly reflective patches fell out. We raised it to **80**, which captured the full body silhouette without bleeding too much into the similarly-toned wood chips in the background.
 3. At threshold **100** the largest group started picking up background debris, so we settled on **80** as our final value.
+=======
+### Color and threshold selection
+
+We opened a frame from the salamander video in an image editor and used the eyedropper on the body to pick the target color. We tried a few threshold values and checked whether the largest group in `groups.csv` matched the body. The largest group came out at **6987 pixels** at **(533, 510)**, which was clearly the salamander since the next largest group was only 5564 pixels. We kept that color and threshold.
+>>>>>>> 09b00ec91a4afb73ea023b57018b052ba55d4ca9
 
 ### Running the processor
 
 ```
+<<<<<<< HEAD
 java -jar target/videoprocessor.jar salamander.mp4 output.csv 5C3A1E 80
 ```
 
@@ -123,3 +130,17 @@ We also ran the processor with a deliberately wrong color (`#FFFFFF`, white, thr
 ### Conclusion
 
 Threshold **80** with color `#5C3A1E` gave reliable tracking throughout the clip except during occlusion, which is the expected failure mode. The key lessons: sample the color from the animal's body (not highlights or shadows), and tune the threshold by widening it until the full body is captured without the largest group jumping to background clutter.
+=======
+java -jar target/videoprocessor.jar salamander.mp4 output.csv <color> <threshold>
+```
+
+This produced `output.csv` with one row per frame across the full ~97 second video.
+
+### Validating the output
+
+We checked two things in `output.csv`:
+
+1. **Smooth movement** — for most of the video the centroid moves gradually (x goes from ~223 down to ~42, y from ~420 to ~590 over the first 40 seconds), which matches a real animal walking across the frame.
+
+2. **False detections** — around t = 61 s and t = 73-89 s the centroid jumps to coordinates near **(301, 8)**, near the very top of the frame. This could be fast movement or adjustments from the camera. This was a sign the threshold was slightly too loose for this video. It was very interesting trying different thresholds but we also readlized it takes a long time to process a video.
+>>>>>>> 09b00ec91a4afb73ea023b57018b052ba55d4ca9
