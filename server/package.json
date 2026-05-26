@@ -1,0 +1,23 @@
+{
+  "name": "centroid-finder",
+  "version": "1.0.0",
+  "description": "AI is _NOT ALLOWED_ for generating implementations of the classes.\r AI is allowed for helping you make test cases.",
+  "homepage": "https://github.com/Elvin-code-dev/centroid-finder#readme",
+  "bugs": {
+    "url": "https://github.com/Elvin-code-dev/centroid-finder/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elvin-code-dev/centroid-finder.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
