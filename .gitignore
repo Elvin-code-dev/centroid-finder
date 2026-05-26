@@ -30,5 +30,8 @@ replay_pid*
 *.avi
 *.mkv
 
+# Node
+node_modules/
+
 # Claude Code
 *.claude/
