@@ -22,3 +22,12 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Video files - do not commit
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Claude Code
+*.claude/
