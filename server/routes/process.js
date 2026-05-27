@@ -1,15 +1,57 @@
 import { Router } from 'express';
+import { spawn } from 'child_process';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
+
+const jobs = {};
 
 // POST /process/:filename - start a processing job
 router.post('/:filename', (req, res) => {
-  res.status(501).json({ error: 'Not implemented yet' });
+  const { targetColor, threshold } = req.query;
+
+  if (!targetColor || !threshold) {
+    return res.status(400).json({ error: 'Missing targetColor or threshold query parameter.' });
+  }
+
+  const jobId = uuidv4();
+  const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, req.params.filename);
+  const outputCsv = resolve(__dirname, '../../', 'results', `${jobId}.csv`);
+  const jarPath = resolve(__dirname, '../', process.env.JAR_PATH);
+
+  jobs[jobId] = { status: 'processing' };
+
+  const child = spawn('java', ['-jar', jarPath, videoPath, outputCsv, targetColor, threshold], {
+    detached: true,
+    stdio: 'ignore'
+  });
+
+  child.on('close', (code) => {
+    if (code === 0) {
+      jobs[jobId] = { status: 'done', result: `/results/${jobId}.csv` };
+    } else {
+      jobs[jobId] = { status: 'error', error: 'Error processing video' };
+    }
+  });
+
+  child.unref();
+
+  res.status(202).json({ jobId });
 });
 
 // GET /process/:jobId/status - check job status
 router.get('/:jobId/status', (req, res) => {
-  res.status(501).json({ error: 'Not implemented yet' });
+  const job = jobs[req.params.jobId];
+
+  if (!job) {
+    return res.status(404).json({ error: 'Job ID not found' });
+  }
+
+  res.json(job);
 });
 
 export default router;

@@ -14,6 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use('/videos', express.static(resolve(__dirname, process.env.VIDEOS_DIR)));
+app.use('/results', express.static(resolve(__dirname, '../results')));
 
 app.use('/api/videos', videosRouter);
 app.use('/thumbnail', thumbnailRouter);
