@@ -3,9 +3,14 @@ import request from 'supertest'
 import express from 'express'
 import { EventEmitter } from 'events'
 import { spawn } from 'child_process'
+import { mkdirSync } from 'fs'
 
 vi.mock('child_process', () => ({
   spawn: vi.fn()
+}))
+
+vi.mock('fs', () => ({
+  mkdirSync: vi.fn()
 }))
 
 import processRouter from '../routes/process.js'
@@ -67,7 +72,7 @@ describe('POST /process/:filename', () => {
     expect(cmd).toBe('java')
     expect(args[0]).toBe('-jar')
     expect(args[2]).toMatch(/video\.mp4$/)  // videoPath
-    expect(args[4]).toBe('255,0,0')          // targetColor
+    expect(args[4]).toBe('FF0000')            // targetColor converted to hex
     expect(args[5]).toBe('50')               // threshold
     expect(opts.detached).toBe(true)
     expect(opts.stdio).toBe('ignore')

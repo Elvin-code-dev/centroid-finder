@@ -3,12 +3,18 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
 const jobs = {};
+
+function rgbToHex(rgbString) {
+  const [r, g, b] = rgbString.split(',').map(Number);
+  return [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
 
 // POST /process/:filename - start a processing job
 router.post('/:filename', (req, res) => {
@@ -20,12 +26,15 @@ router.post('/:filename', (req, res) => {
 
   const jobId = uuidv4();
   const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, req.params.filename);
-  const outputCsv = resolve(__dirname, '../../', 'results', `${jobId}.csv`);
+  const resultsDir = resolve(__dirname, '../../', 'results');
+  const outputCsv = resolve(resultsDir, `${jobId}.csv`);
   const jarPath = resolve(__dirname, '../', process.env.JAR_PATH);
+  const hexColor = rgbToHex(targetColor);
 
+  mkdirSync(resultsDir, { recursive: true });
   jobs[jobId] = { status: 'processing' };
 
-  const child = spawn('java', ['-jar', jarPath, videoPath, outputCsv, targetColor, threshold], {
+  const child = spawn('java', ['-jar', jarPath, videoPath, outputCsv, hexColor, threshold], {
     detached: true,
     stdio: 'ignore'
   });
