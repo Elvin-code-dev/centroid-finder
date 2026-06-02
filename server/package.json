@@ -1,0 +1,32 @@
+{
+	"name": "centroid-finder",
+	"version": "1.0.0",
+	"description": "Yes, we will find the salamander for you.",
+	"homepage": "https://github.com/Elvin-code-dev/centroid-finder#readme",
+	"bugs": {
+		"url": "https://github.com/Elvin-code-dev/centroid-finder/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Elvin-code-dev/centroid-finder.git"
+	},
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"directories": {
+		"lib": "lib"
+	},
+	"scripts": {
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"dotenv": "^17.4.2",
+		"express": "^5.2.1",
+		"uuid": "^14.0.0"
+	},
+	"devDependencies": {
+		"supertest": "^7.2.2",
+		"vitest": "^4.1.7"
+	}
+}
