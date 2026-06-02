@@ -7,10 +7,10 @@
 - Are there unused files/methods that can be removed?
     - serverPlan.md, sampleInput, sampleOutput, duplicate test class files
 - Where would additional Java interfaces be appropriate?
-    - 
+    - Probably not
 - How can you make things simpler, more-usable, and easier to maintain?
 Other refactoring improvements?
-    - 
+    - Better file organisation
 
 ## adding tests
 
@@ -24,15 +24,15 @@ Other refactoring improvements?
 ## improving error handling
 
 - What parts of your code are brittle?
-    - 
+    - routes
 - Where could you better be using exceptions?
-    - 
+    - DfsBinaryGroupFinder.java
 - Where can you better add input validation to check invalid input?
-    - 
+    - routes
 - How can you better be resolving/logging/surfacing errors? Hint: almost any place you're using "throws Exception" or "catch(Exception e)" should likely be improved to specify the specific types of exceptions that might be thrown or caught.
-    - 
+    - DfsBinaryGroupFinder.java
 - Other error handling improvements?
-    -
+    - 
 
 ## writing documentation
 
@@ -41,11 +41,12 @@ Other refactoring improvements?
 - What documentation could be made clearer or improved?
     - We currently do not have documentation
 - Are there sections of dead code that are commented out?
-    - 
+    - There is not
 - Where would be the most important places to add documentation to make your code easier to read?
     - tests, routes
 - Other documentation improvements?
     - update README.md
+    
 ## improving performance (optional)
 
 - What parts of your code / tests run particularly slowly?
