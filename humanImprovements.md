@@ -1,34 +1,51 @@
 ## refactoring code
 
 - What improvements can you make to the design/architecture of your code?
+    - There are duplicate .class files in a second src folder
 - How can you split up large methods or classes into smaller components?
+    - Test files could be moved to seperate folder
 - Are there unused files/methods that can be removed?
+    - serverPlan.md, sampleInput, sampleOutput, duplicate test class files
 - Where would additional Java interfaces be appropriate?
+    - 
 - How can you make things simpler, more-usable, and easier to maintain?
 Other refactoring improvements?
+    - 
 
 ## adding tests
 
 - What portions of your code are untested / only lightly tested?
+    - process.js, thumbnail.js, video.js
 - Where would be the highest priority places to add new tests?
+    - videos.js
 - Other testing improvements?
+    - Test documentation
 
 ## improving error handling
 
 - What parts of your code are brittle?
+    - 
 - Where could you better be using exceptions?
+    - 
 - Where can you better add input validation to check invalid input?
+    - 
 - How can you better be resolving/logging/surfacing errors? Hint: almost any place you're using "throws Exception" or "catch(Exception e)" should likely be improved to specify the specific types of exceptions that might be thrown or caught.
+    - 
 - Other error handling improvements?
+    -
 
 ## writing documentation
 
 - What portions of your code are missing Javadoc/JSdoc for the methods/classes?
+    - We currently do not have documentation
 - What documentation could be made clearer or improved?
+    - We currently do not have documentation
 - Are there sections of dead code that are commented out?
+    - 
 - Where would be the most important places to add documentation to make your code easier to read?
+    - tests, routes
 - Other documentation improvements?
-
+    - update README.md
 ## improving performance (optional)
 
 - What parts of your code / tests run particularly slowly?
