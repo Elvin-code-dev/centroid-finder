@@ -87,6 +87,58 @@ describe('POST /process/:filename', () => {
   })
 })
 
+describe('POST /process/:filename - invalid targetColor format', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns 400 when targetColor is not numeric', async () => {
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: 'red', threshold: '50' })
+    expect(res.status).toBe(400)
+    expect(res.body).toHaveProperty('error')
+  })
+
+  it('returns 400 when targetColor is missing a component', async () => {
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: '255,0', threshold: '50' })
+    expect(res.status).toBe(400)
+    expect(res.body).toHaveProperty('error')
+  })
+
+  it('returns 400 when a targetColor component exceeds 255', async () => {
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: '256,0,0', threshold: '50' })
+    expect(res.status).toBe(400)
+    expect(res.body).toHaveProperty('error')
+  })
+
+  it('returns 400 when a targetColor component is negative', async () => {
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: '-1,0,0', threshold: '50' })
+    expect(res.status).toBe(400)
+    expect(res.body).toHaveProperty('error')
+  })
+
+  it('returns 202 for a valid boundary color (0,0,0)', async () => {
+    makeMockProc()
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: '0,0,0', threshold: '50' })
+    expect(res.status).toBe(202)
+  })
+
+  it('returns 202 for a valid boundary color (255,255,255)', async () => {
+    makeMockProc()
+    const res = await request(app)
+      .post('/process/video.mp4')
+      .query({ targetColor: '255,255,255', threshold: '50' })
+    expect(res.status).toBe(202)
+  })
+})
+
 describe('GET /process/:jobId/status', () => {
   beforeEach(() => vi.clearAllMocks())
 

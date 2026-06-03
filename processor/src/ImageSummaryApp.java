@@ -1,21 +1,20 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
  * The Image Summary Application.
- *
+ * 
  * This application takes four command-line arguments:
  * 1. The path to an input image file (for example, "image.png").
  * 2. The path to the output CSV file (for example, "results/job123.csv").
  * 3. A target hex color in the format RRGGBB (for example, "FF0000" for red).
  * 4. An integer threshold for binarization.
- *
+ * 
  * The application performs the following steps:
- *
+ * 
  * 1. Loads the input image.
  * 2. Parses the target color from the hex string into a 24-bit integer.
  * 3. Binarizes the image by comparing each pixel's Euclidean color distance to
@@ -32,7 +31,7 @@ import javax.imageio.ImageIO;
  * one row per group in the format "size,x,y".
  * Coordinates follow the convention: (x:0, y:0) is the top-left, with x
  * increasing to the right and y increasing downward.
- *
+ * 
  * Usage:
  * java ImageSummaryApp <input_image> <output_csv> <hex_target_color>
  * <threshold>
@@ -58,10 +57,10 @@ public class ImageSummaryApp {
         BufferedImage inputImage = null;
         try {
             inputImage = ImageIO.read(new File(inputImagePath));
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error loading image: " + inputImagePath);
             e.printStackTrace();
-            System.exit(1);
+            return;
         }
 
         // Parse the target color from a hex string (format RRGGBB) into a 24-bit
@@ -86,7 +85,7 @@ public class ImageSummaryApp {
         try {
             ImageIO.write(binaryImage, "png", new File("binarized.png"));
             System.out.println("Binarized image saved as binarized.png");
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error saving binarized image.");
             e.printStackTrace();
         }
@@ -106,10 +105,9 @@ public class ImageSummaryApp {
                 writer.println(group.toCsvRow());
             }
             System.out.println("Groups summary saved as " + outputCsvPath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error writing CSV to: " + outputCsvPath);
             e.printStackTrace();
-            System.exit(1);
         }
     }
 }

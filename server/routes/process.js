@@ -11,6 +11,15 @@ const router = Router();
 
 const jobs = {};
 
+function isValidRgb(rgbString) {
+  const parts = rgbString.split(',');
+  if (parts.length !== 3) return false;
+  return parts.every(p => {
+    const n = Number(p.trim());
+    return Number.isInteger(n) && n >= 0 && n <= 255;
+  });
+}
+
 function rgbToHex(rgbString) {
   const [r, g, b] = rgbString.split(',').map(Number);
   return [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('').toUpperCase();
@@ -22,6 +31,10 @@ router.post('/:filename', (req, res) => {
 
   if (!targetColor || !threshold) {
     return res.status(400).json({ error: 'Missing targetColor or threshold query parameter.' });
+  }
+
+  if (!isValidRgb(targetColor)) {
+    return res.status(400).json({ error: 'targetColor must be in R,G,B format with each value between 0 and 255.' });
   }
 
   const jobId = uuidv4();
