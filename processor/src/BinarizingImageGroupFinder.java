@@ -1,5 +1,4 @@
 import java.awt.image.BufferedImage;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -41,11 +40,7 @@ public class BinarizingImageGroupFinder implements ImageGroupFinder {
         // Convert the input buffered image to a binary image array
         int[][] binaryImage = binarizer.toBinaryArray(image);
 
-        // Locate the connected groups through the group finder
-        List<Group> groups = groupFinder.findConnectedGroups(binaryImage);
-
-        // Return the groups in descending order
-        groups.sort(Comparator.reverseOrder());
-        return groups;
+        // DfsBinaryGroupFinder already returns groups in descending order per its contract
+        return groupFinder.findConnectedGroups(binaryImage);
     }
 }
