@@ -1,3 +1,0 @@
-- Heatmap
-- Event graph
-- Video summary
