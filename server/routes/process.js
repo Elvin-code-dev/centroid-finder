@@ -1,23 +1,54 @@
 import { Router } from 'express';
-  import { spawn } from 'child_process';
-  import { resolve } from 'path';
-  import { fileURLToPath } from 'url';
-  import { dirname } from 'path';
-  import { mkdirSync } from 'fs';
-  import { v4 as uuidv4 } from 'uuid';
+import { spawn } from 'child_process';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { mkdirSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+// test
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const router = Router();
 
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const router = Router();
+const jobs = {};
 
-  const jobs = {};
+function rgbToHex(rgbString) {
+  const [r, g, b] = rgbString.split(',').map(Number);
+  return [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
 
-  function isValidRgb(rgbString) {
-    const parts = rgbString.split(',');
-    if (parts.length !== 3) return false;
-    return parts.every(part => {
-      const n = Number(part.trim());
-      return Number.isInteger(n) && n >= 0 && n <= 255;
-    });
+/**
+ * POST /api/process/:filename
+ *
+ * Starts an asynchronous video-processing job that runs a JAR-based colour-
+ * detection analysis on the specified video. The job runs detached in the
+ * background; poll the status endpoint with the returned jobId to check
+ * progress.
+ *
+ * @route   POST /api/process/:filename
+ * @param   {string} filename        - The video filename (path param). Must exist
+ *                                     inside the directory specified by VIDEOS_DIR.
+ * @queryparam {string} targetColor  - Target RGB colour expressed as "R,G,B"
+ *                                     (e.g. "255,0,128"). Required.
+ * @queryparam {string} threshold    - Detection sensitivity threshold. Required.
+ * @returns {{ jobId: string }}                202 - Job accepted; use jobId to poll status.
+ * @returns {{ error: string }}                400 - Missing required query parameters.
+ *
+ * @example
+ * // Request
+ * POST /api/process/clip1.mp4?targetColor=255,0,128&threshold=10
+ *
+ * // Response (202)
+ * { "jobId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301" }
+ *
+ * // Response (400)
+ * { "error": "Missing targetColor or threshold query parameter." }
+ */
+
+router.post('/:filename', (req, res) => {
+  const { targetColor, threshold } = req.query;
+
+  if (!targetColor || !threshold) {
+    return res.status(400).json({ error: 'Missing targetColor or threshold query parameter.' });
   }
 
   function rgbToHex(rgbString) {
