@@ -1,193 +1,163 @@
 import { vi, describe, it, expect, beforeEach, beforeAll } from "vitest";
-import request from "supertest";
-import express from "express";
-import { EventEmitter } from "events";
-import { spawn } from "child_process";
-import { mkdirSync } from "fs";
+  import request from "supertest";
+  import express from "express";
+  import { EventEmitter } from "events";
+  import { spawn } from "child_process";
+  import { mkdirSync } from "fs";
 
-vi.mock("child_process", () => ({
-	spawn: vi.fn(),
-}));
+  vi.mock("child_process", () => ({
+        spawn: vi.fn(),
+  }));
 
-/**
- * GET /api/process/:jobId/status
- *
- * Returns the current status of a previously submitted processing job.
- *
- * @route   GET /api/process/:jobId/status
- * @param   {string} jobId - The UUID returned when the job was created (path param).
- * @returns {{ status: 'processing' }}                          200 - Job is still running.
- * @returns {{ status: 'done', result: string }}                200 - Job finished; `result`
- *           is the path to the output CSV (e.g. `/results/<jobId>.csv`).
- * @returns {{ status: 'error', error: string }}                200 - Job failed.
- * @returns {{ error: string }}                                 404 - Unknown jobId.
- *
- * @example
- * // Request
- * GET /api/process/3f2504e0-4f89-11d3-9a0c-0305e82c3301/status
- *
- * // Response – still running
- * { "status": "processing" }
- *
- * // Response – finished
- * { "status": "done", "result": "/results/3f2504e0-4f89-11d3-9a0c-0305e82c3301.csv" }
- *
- * // Response – failed
- * { "status": "error", "error": "Error processing video" }
- *
- * // Response (404)
- * { "error": "Job ID not found" }
- */
+  vi.mock("fs", () => ({
+        mkdirSync: vi.fn(),
+  }));
 
-router.get("/:jobId/status", (req, res) => {
-	const job = jobs[req.params.jobId];
+  import processRouter from "../routes/process.js";
 
-	import processRouter from "../routes/process.js";
+  const app = express();
+  app.use(express.json());
+  app.use("/process", processRouter);
 
-	const app = express();
-	app.use(express.json());
-	app.use("/process", processRouter);
+  beforeAll(() => {
+        process.env.VIDEOS_DIR = "../videos";
+        process.env.JAR_PATH = "../processor/target/videoprocessor.jar";
+  });
 
-	beforeAll(() => {
-		process.env.VIDEOS_DIR = "../videos";
-		process.env.JAR_PATH = "../processor/target/videoprocessor.jar";
-	});
+  function makeMockProc() {
+        const proc = new EventEmitter();
+        proc.unref = vi.fn();
+        vi.mocked(spawn).mockReturnValue(proc);
+        return proc;
+  }
 
-	function makeMockProc() {
-		const proc = new EventEmitter();
-		proc.unref = vi.fn();
-		vi.mocked(spawn).mockReturnValue(proc);
-		return proc;
-	}
+  describe("POST /process/:filename", () => {
+        beforeEach(() => vi.clearAllMocks());
 
-	describe("POST /process/:filename", () => {
-		beforeEach(() => vi.clearAllMocks());
+        it("returns 400 if targetColor is missing", async () => {
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ threshold: "50" });
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 400 if targetColor is missing", async () => {
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ threshold: "50" });
-			expect(res.status).toBe(400);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns 400 if threshold is missing", async () => {
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0" });
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 400 if threshold is missing", async () => {
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0" });
-			expect(res.status).toBe(400);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns 400 if targetColor has fewer than three components", async () => {
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0", threshold: "50" });
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 400 if targetColor has fewer than three components", async () => {
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0", threshold: "50" });
-			expect(res.status).toBe(400);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns 400 if targetColor contains non-numeric values", async () => {
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "red,0,0", threshold: "50" });
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 400 if targetColor contains non-numeric values", async () => {
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "red,0,0", threshold: "50" });
-			expect(res.status).toBe(400);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns 400 if targetColor values are out of 0-255 range", async () => {
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "256,0,0", threshold: "50" });
+                expect(res.status).toBe(400);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 400 if targetColor values are out of 0-255 range", async () => {
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "256,0,0", threshold: "50" });
-			expect(res.status).toBe(400);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns 202 with a jobId when request is valid", async () => {
+                makeMockProc();
+                const res = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
+                expect(res.status).toBe(202);
+                expect(res.body).toHaveProperty("jobId");
+                expect(typeof res.body.jobId).toBe("string");
+                expect(res.body.jobId).not.toBe("");
+        });
 
-		it("returns 202 with a jobId when request is valid", async () => {
-			makeMockProc();
-			const res = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
-			expect(res.status).toBe(202);
-			expect(res.body).toHaveProperty("jobId");
-			expect(typeof res.body.jobId).toBe("string");
-			expect(res.body.jobId).not.toBe("");
-		});
+        it("spawns java with the JAR and correct arguments", async () => {
+                makeMockProc();
+                await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
 
-		it("spawns java with the JAR and correct arguments", async () => {
-			makeMockProc();
-			await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
+                expect(vi.mocked(spawn)).toHaveBeenCalledOnce();
+                const [cmd, args, opts] = vi.mocked(spawn).mock.calls[0];
+                expect(cmd).toBe("java");
+                expect(args[0]).toBe("-jar");
+                expect(args[2]).toMatch(/video\.mp4$/);
+                expect(args[4]).toBe("FF0000");
+                expect(args[5]).toBe("50");
+                expect(opts.detached).toBe(true);
+                expect(opts.stdio).toBe("ignore");
+        });
 
-			expect(vi.mocked(spawn)).toHaveBeenCalledOnce();
-			const [cmd, args, opts] = vi.mocked(spawn).mock.calls[0];
-			expect(cmd).toBe("java");
-			expect(args[0]).toBe("-jar");
-			expect(args[2]).toMatch(/video\.mp4$/); // videoPath
-			expect(args[4]).toBe("FF0000"); // targetColor converted to hex
-			expect(args[5]).toBe("50"); // threshold
-			expect(opts.detached).toBe(true);
-			expect(opts.stdio).toBe("ignore");
-		});
+        it("calls unref() on the child process", async () => {
+                const mockProc = makeMockProc();
+                await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
+                expect(mockProc.unref).toHaveBeenCalledOnce();
+        });
+  });
 
-		it("calls unref() on the child process", async () => {
-			const mockProc = makeMockProc();
-			await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
-			expect(mockProc.unref).toHaveBeenCalledOnce();
-		});
-	});
+  describe("GET /process/:jobId/status", () => {
+        beforeEach(() => vi.clearAllMocks());
 
-	describe("GET /process/:jobId/status", () => {
-		beforeEach(() => vi.clearAllMocks());
+        it("returns 404 for an unknown jobId", async () => {
+                const res = await request(app).get("/process/nonexistent-id/status");
+                expect(res.status).toBe(404);
+                expect(res.body).toHaveProperty("error");
+        });
 
-		it("returns 404 for an unknown jobId", async () => {
-			const res = await request(app).get("/process/nonexistent-id/status");
-			expect(res.status).toBe(404);
-			expect(res.body).toHaveProperty("error");
-		});
+        it("returns processing status immediately after a POST", async () => {
+                makeMockProc();
+                const postRes = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
+                const { jobId } = postRes.body;
 
-		it("returns processing status immediately after a POST", async () => {
-			makeMockProc();
-			const postRes = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
-			const { jobId } = postRes.body;
+                const statusRes = await request(app).get(`/process/${jobId}/status`);
+                expect(statusRes.status).toBe(200);
+                expect(statusRes.body.status).toBe("processing");
+        });
 
-			const statusRes = await request(app).get(`/process/${jobId}/status`);
-			expect(statusRes.status).toBe(200);
-			expect(statusRes.body.status).toBe("processing");
-		});
+        it("returns done status after the JAR exits successfully", async () => {
+                const mockProc = makeMockProc();
+                const postRes = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
+                const { jobId } = postRes.body;
 
-		it("returns done status after the JAR exits successfully", async () => {
-			const mockProc = makeMockProc();
-			const postRes = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
-			const { jobId } = postRes.body;
+                mockProc.emit("close", 0);
 
-			mockProc.emit("close", 0);
+                const statusRes = await request(app).get(`/process/${jobId}/status`);
+                expect(statusRes.status).toBe(200);
+                expect(statusRes.body.status).toBe("done");
+                expect(statusRes.body).toHaveProperty("result");
+        });
 
-			const statusRes = await request(app).get(`/process/${jobId}/status`);
-			expect(statusRes.status).toBe(200);
-			expect(statusRes.body.status).toBe("done");
-			expect(statusRes.body).toHaveProperty("result");
-		});
+        it("returns error status after the JAR exits with a non-zero code", async () => {
+                const mockProc = makeMockProc();
+                const postRes = await request(app)
+                        .post("/process/video.mp4")
+                        .query({ targetColor: "255,0,0", threshold: "50" });
+                const { jobId } = postRes.body;
 
-		it("returns error status after the JAR exits with a non-zero code", async () => {
-			const mockProc = makeMockProc();
-			const postRes = await request(app)
-				.post("/process/video.mp4")
-				.query({ targetColor: "255,0,0", threshold: "50" });
-			const { jobId } = postRes.body;
+                mockProc.emit("close", 1);
 
-			mockProc.emit("close", 1);
-
-			const statusRes = await request(app).get(`/process/${jobId}/status`);
-			expect(statusRes.status).toBe(200);
-			expect(statusRes.body.status).toBe("error");
-		});
-	});
-});
+                const statusRes = await request(app).get(`/process/${jobId}/status`);
+                expect(statusRes.status).toBe(200);
+                expect(statusRes.body.status).toBe("error");
+        });
+  });
