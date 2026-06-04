@@ -27,33 +27,24 @@ function rgbToHex(rgbString) {
  * @route   POST /api/process/:filename
  * @param   {string} filename        - The video filename (path param). Must exist
  *                                     inside the directory specified by VIDEOS_DIR.
- *                                     Must not contain `/`, `\`, or `..`.
  * @queryparam {string} targetColor  - Target RGB colour expressed as "R,G,B"
  *                                     (e.g. "255,0,128"). Required.
  * @queryparam {string} threshold    - Detection sensitivity threshold. Required.
  * @returns {{ jobId: string }}                202 - Job accepted; use jobId to poll status.
- * @returns {{ error: string }}                400 - Invalid filename or missing query parameters.
+ * @returns {{ error: string }}                400 - Missing required query parameters.
  *
  * @example
  * // Request
- * POST /process/clip1.mp4?targetColor=255,0,128&threshold=10
+ * POST /api/process/clip1.mp4?targetColor=255,0,128&threshold=10
  *
  * // Response (202)
  * { "jobId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301" }
  *
- * // Response (400 – invalid filename)
- * { "error": "Invalid filename." }
- *
- * // Response (400 – missing params)
+ * // Response (400)
  * { "error": "Missing targetColor or threshold query parameter." }
  */
 
 router.post('/:filename', (req, res) => {
-  const { filename } = req.params;
-  if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
-    return res.status(400).json({ error: 'Invalid filename.' });
-  }
-
   const { targetColor, threshold } = req.query;
 
   if (!targetColor || !threshold) {
@@ -61,7 +52,7 @@ router.post('/:filename', (req, res) => {
   }
 
   const jobId = uuidv4();
-  const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, filename);
+  const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, req.params.filename);
   const resultsDir = resolve(__dirname, '../../', 'results');
   const outputCsv = resolve(resultsDir, `${jobId}.csv`);
   const jarPath = resolve(__dirname, '../', process.env.JAR_PATH);

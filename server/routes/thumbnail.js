@@ -7,39 +7,9 @@ import { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
-/**
- * GET /api/thumbnail/:filename
- *
- * Extracts and streams the first frame of the specified video as a JPEG image.
- * Uses ffmpeg under the hood; the response streams raw JPEG bytes to the client.
- *
- * @route   GET /api/thumbnail/:filename
- * @param   {string} filename - The video filename (path param). Must exist inside
- *                              the directory specified by the VIDEOS_DIR env var.
- *                              Must not contain `/`, `\`, or `..`.
- * @returns {Buffer}               200 - JPEG image data (Content-Type: image/jpeg).
- * @returns {{ error: string }}    400 - Filename contains illegal path characters.
- * @returns {{ error: string }}    500 - ffmpeg failed before any data was written.
- *
- * @example
- * // Request
- * GET /thumbnail/clip1.mp4
- *
- * // Success: binary JPEG bytes are streamed directly
- *
- * // Response (400)
- * { "error": "Invalid filename." }
- *
- * // Response (500 – sent only when no data has been written yet)
- * { "error": "Error generating thumbnail" }
- */
 router.get('/:filename', (req, res) => {
-  const { filename } = req.params;
-  if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
-    return res.status(400).json({ error: 'Invalid filename.' });
-  }
+  const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, req.params.filename);
 
-  const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, filename);
   const ffmpeg = spawn('ffmpeg', [
     '-i', videoPath,
     '-frames:v', '1',
