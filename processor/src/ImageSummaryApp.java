@@ -38,8 +38,7 @@ import javax.imageio.ImageIO;
   public class ImageSummaryApp {
       public static void main(String[] args) {
           if (args.length < 4) {
-              System.err.println("Usage: java ImageSummaryApp <input_image> <output_csv> <hex_target_color>
-  <threshold>");
+              System.err.println("Usage: java ImageSummaryApp <input_image> <output_csv> <hex_target_color> <threshold>");
               System.exit(1);
           }
 
