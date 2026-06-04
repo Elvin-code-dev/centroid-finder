@@ -7,6 +7,27 @@ import { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
+/**
+ * GET /api/thumbnail/:filename
+ *
+ * Extracts and streams the first frame of the specified video as a JPEG image.
+ * Uses ffmpeg under the hood; the response streams raw JPEG bytes to the client.
+ *
+ * @route   GET /api/thumbnail/:filename
+ * @param   {string} filename - The video filename (path param). Must exist inside
+ *                              the directory specified by the VIDEOS_DIR env var.
+ * @returns {Buffer}               200 - JPEG image data (Content-Type: image/jpeg).
+ * @returns {{ error: string }}    500 - ffmpeg failed before any data was written.
+ *
+ * @example
+ * // Request
+ * GET /api/thumbnail/clip1.mp4
+ *
+ * // Success: binary JPEG bytes are streamed directly
+ *
+ * // Response (500 – sent only when no data has been written yet)
+ * { "error": "Error generating thumbnail" }
+ */
 router.get('/:filename', (req, res) => {
   const videoPath = resolve(__dirname, '../', process.env.VIDEOS_DIR, req.params.filename);
 
