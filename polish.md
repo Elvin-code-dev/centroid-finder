@@ -1,2 +1,4 @@
 - Live deployed link
 - consistent code formatting (Prettier, linters)
+- clean up the README to be recruiter-facing — explain what the project does, how to run it, and what the API endpoints are. Also audit the codebase for dead files, improve comments, and make sure formatting is consistent throughout the whole project
+- Record a GIF of the frontend in action and embed it in the README
