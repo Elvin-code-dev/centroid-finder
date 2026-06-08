@@ -1,0 +1,2 @@
+- Live deployed link
+- consistent code formatting (Prettier, linters)

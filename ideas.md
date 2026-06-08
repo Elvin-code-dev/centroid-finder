@@ -1,3 +1,6 @@
 - Heatmap
 - Event graph
-- Video summary
+- Video summary using AI
+- video cropping to keep unwanted space out of the video
+- Downloadable summary / event graph
+- Compare feature for two or more videos
