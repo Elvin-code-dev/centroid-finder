@@ -13,6 +13,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json()); // parse JSON request bodies (e.g. rename)
+
 app.use('/videos', express.static(resolve(__dirname, process.env.VIDEOS_DIR)));
 app.use('/results', express.static(resolve(__dirname, '../results')));
 

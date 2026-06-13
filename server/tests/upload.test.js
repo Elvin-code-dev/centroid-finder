@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import express from 'express'
-import { mkdirSync, rmSync, existsSync } from 'fs'
+import { mkdirSync, rmSync, existsSync, writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 
@@ -12,6 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const tmpDir = resolve(__dirname, 'tmp-videos')
 
 const app = express()
+app.use(express.json())
 app.use('/api/videos', videosRouter)
 
 beforeAll(() => {
@@ -74,5 +75,71 @@ describe('POST /api/videos', () => {
     expect(res.status).toBe(200)
     expect(res.body).toContain('clip.mp4')
     expect(res.body).toContain('clip-1.mp4')
+  })
+})
+
+describe('PATCH /api/videos/:filename (rename)', () => {
+  beforeAll(() => {
+    writeFileSync(resolve(tmpDir, 'old.mp4'), 'data')
+    writeFileSync(resolve(tmpDir, 'taken.mp4'), 'data')
+  })
+
+  it('renames a video and keeps its extension', async () => {
+    const res = await request(app)
+      .patch('/api/videos/old.mp4')
+      .send({ newName: 'renamed' })
+
+    expect(res.status).toBe(200)
+    expect(res.body.filename).toBe('renamed.mp4')
+    expect(existsSync(resolve(tmpDir, 'renamed.mp4'))).toBe(true)
+    expect(existsSync(resolve(tmpDir, 'old.mp4'))).toBe(false)
+  })
+
+  it('returns 404 when the video does not exist', async () => {
+    const res = await request(app)
+      .patch('/api/videos/missing.mp4')
+      .send({ newName: 'whatever' })
+
+    expect(res.status).toBe(404)
+  })
+
+  it('returns 409 when the new name is already taken', async () => {
+    writeFileSync(resolve(tmpDir, 'source.mp4'), 'data')
+    const res = await request(app)
+      .patch('/api/videos/source.mp4')
+      .send({ newName: 'taken' })
+
+    expect(res.status).toBe(409)
+  })
+
+  it('returns 400 when newName is missing', async () => {
+    const res = await request(app).patch('/api/videos/taken.mp4').send({})
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects unsafe filenames', async () => {
+    const res = await request(app)
+      .patch('/api/videos/..%2Fsecret.mp4')
+      .send({ newName: 'x' })
+    expect(res.status).toBe(400)
+  })
+})
+
+describe('DELETE /api/videos/:filename', () => {
+  beforeAll(() => {
+    writeFileSync(resolve(tmpDir, 'todelete.mp4'), 'data')
+  })
+
+  it('deletes an existing video', async () => {
+    const res = await request(app).delete('/api/videos/todelete.mp4')
+
+    expect(res.status).toBe(200)
+    expect(res.body.deleted).toBe('todelete.mp4')
+    expect(existsSync(resolve(tmpDir, 'todelete.mp4'))).toBe(false)
+  })
+
+  it('returns 404 when the video does not exist', async () => {
+    const res = await request(app).delete('/api/videos/missing.mp4')
+    expect(res.status).toBe(404)
   })
 })

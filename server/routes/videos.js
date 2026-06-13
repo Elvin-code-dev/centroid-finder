@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { readdir } from 'fs/promises';
+import { readdir, rename, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import { resolve, extname, basename } from 'path';
 import { fileURLToPath } from 'url';
@@ -13,6 +13,11 @@ const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.avi', '.mkv'];
 
 function videosDir() {
   return resolve(__dirname, '../', process.env.VIDEOS_DIR);
+}
+
+// Rejects names with path separators or ".." so requests can't escape the videos folder
+function isUnsafe(name) {
+  return !name || name.includes('/') || name.includes('\\') || name.includes('..');
 }
 
 // Where and how uploaded files get saved
@@ -84,6 +89,85 @@ router.post('/', upload.single('video'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded.' });
   }
   res.status(201).json({ filename: req.file.filename });
+});
+
+/**
+ * PATCH /api/videos/:filename
+ *
+ * Renames a video. Expects JSON body { newName: string }.
+ * The new name keeps the original file's extension.
+ *
+ * @returns {{ filename: string }} 200 - Renamed; the new full filename.
+ * @returns {{ error: string }}    400 - Unsafe name or missing newName.
+ * @returns {{ error: string }}    404 - Original video not found.
+ * @returns {{ error: string }}    409 - A video with the new name already exists.
+ */
+router.patch('/:filename', async (req, res) => {
+  const { filename } = req.params;
+  const { newName } = req.body || {};
+
+  if (isUnsafe(filename)) {
+    return res.status(400).json({ error: 'Invalid filename.' });
+  }
+  if (!newName) {
+    return res.status(400).json({ error: 'Missing newName.' });
+  }
+
+  // keep the original extension, clean the rest of the name
+  const ext = extname(filename);
+  const cleanBase = basename(newName, extname(newName)).replace(/[^a-zA-Z0-9._-]/g, '_');
+  if (!cleanBase) {
+    return res.status(400).json({ error: 'New name is empty after cleaning.' });
+  }
+  const finalName = `${cleanBase}${ext}`;
+
+  const from = join(videosDir(), filename);
+  const to = join(videosDir(), finalName);
+
+  if (!existsSync(from)) {
+    return res.status(404).json({ error: 'Video not found.' });
+  }
+  if (finalName !== filename && existsSync(to)) {
+    return res.status(409).json({ error: 'A video with that name already exists.' });
+  }
+
+  try {
+    await rename(from, to);
+    res.json({ filename: finalName });
+  } catch (err) {
+    console.error('Error renaming video:', err);
+    res.status(500).json({ error: 'Error renaming video.' });
+  }
+});
+
+/**
+ * DELETE /api/videos/:filename
+ *
+ * Deletes a video from the server.
+ *
+ * @returns {{ deleted: string }} 200 - Deleted; the filename removed.
+ * @returns {{ error: string }}   400 - Unsafe filename.
+ * @returns {{ error: string }}   404 - Video not found.
+ */
+router.delete('/:filename', async (req, res) => {
+  const { filename } = req.params;
+
+  if (isUnsafe(filename)) {
+    return res.status(400).json({ error: 'Invalid filename.' });
+  }
+
+  const target = join(videosDir(), filename);
+  if (!existsSync(target)) {
+    return res.status(404).json({ error: 'Video not found.' });
+  }
+
+  try {
+    await unlink(target);
+    res.json({ deleted: filename });
+  } catch (err) {
+    console.error('Error deleting video:', err);
+    res.status(500).json({ error: 'Error deleting video.' });
+  }
 });
 
 // Turns upload errors (bad type, too large) into a 400 JSON response
