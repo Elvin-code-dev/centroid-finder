@@ -48,6 +48,13 @@ router.get('/:filename', (req, res) => {
     'pipe:1'
   ]);
 
+  // If ffmpeg can't even start don't crash the server.
+  ffmpeg.on('error', () => {
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Could not generate thumbnail (is ffmpeg installed?)' });
+    }
+  });
+
   ffmpeg.stdout.on('data', (chunk) => {
     if (!res.headersSent) {
       res.setHeader('Content-Type', 'image/jpeg');
