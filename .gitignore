@@ -37,5 +37,8 @@ node_modules/
 target/
 META-INF/
 
+# Per-run processing output (CSVs) — personal, not source
+results/
+
 # Claude Code
 *.claude/
