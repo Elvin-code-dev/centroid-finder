@@ -1,4 +1,8 @@
-# centroid-finder
+# Salamander Project
+
+A tool for analysing videos of lizards moving on a flat surface. It binarizes each frame based on a target color and threshold, then finds the centroid of the largest contiguous mass (the lizard).
+
+![Demo](assets/demo.gif)
 
 ## *DO THIS FIRST* Wave 0: AI Rules 
 AI is *NOT ALLOWED* for generating implementations of the classes.
